@@ -21,6 +21,15 @@ private class ValidFormWithoutParams < Post::BaseForm
   end
 end
 
+private class ValidFormWithVirtualParam < Post::BaseForm
+  virtual author : String
+
+  def prepare
+    validate_required author
+    title.value = "My Title - #{author.value}"
+  end
+end
+
 private class LineItemForm < LineItem::BaseForm
   fillable :name
 end
@@ -323,6 +332,11 @@ describe "LuckyRecord::Form" do
       post.title.should eq("My Title")
     end
 
+    it "can set virtual fields" do
+      post = ValidFormWithVirtualParam.create!(author: "Jane Cohen")
+      post.title.should eq("My Title - Jane Cohen")
+    end
+
     context "on success" do
       it "saves and returns the record" do
         params = {"joined_at" => now_as_string, "name" => "New Name", "age" => "30"}
@@ -352,6 +366,7 @@ describe "LuckyRecord::Form" do
         )
         LineItemQuery.new.id("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11").select_count.should eq 1
       end
+
     end
 
     it "can handle a field named 'value'" do
@@ -437,6 +452,12 @@ describe "LuckyRecord::Form" do
       post = PostBox.new.title("Original Title").create
       post = ValidFormWithoutParams.update!(post)
       post.title.should eq "My Title"
+    end
+
+    it "can set virtual fields" do
+      post = PostBox.new.title("Original Title").create
+      post = ValidFormWithVirtualParam.update!(post, author: "Jane Cohen")
+      post.title.should eq("My Title - Jane Cohen")
     end
 
     context "on success" do
