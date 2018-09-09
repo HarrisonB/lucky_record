@@ -95,6 +95,14 @@ module LuckyRecord::NeedyInitializerAndSaveMethods
         {% end %}
       {% end %}
 
+      {% if @type.constant :VIRTUAL_FIELDS %}
+        {% for field in VIRTUAL_FIELDS %}
+          unless {{ field.var }}.is_a? Nothing
+            form.{{ field.var }}.value = {{ field.var }}
+          end
+        {% end %}
+      {% end %}
+
       {% if with_bang %}
         form.save!
       {% else %}
@@ -138,6 +146,14 @@ module LuckyRecord::NeedyInitializerAndSaveMethods
         {% for field in FIELDS %}
           unless {{ field[:name] }}.is_a? Nothing
             form.{{ field[:name] }}.value = {{ field[:name] }}
+          end
+        {% end %}
+      {% end %}
+
+      {% if @type.constant :VIRTUAL_FIELDS %}
+        {% for field in VIRTUAL_FIELDS %}
+          unless {{ field.var }}.is_a? Nothing
+            form.{{ field.var }}.value = {{ field.var }}
           end
         {% end %}
       {% end %}
